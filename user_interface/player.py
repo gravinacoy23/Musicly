@@ -11,7 +11,7 @@ class Window(
         super().__init__()
 
         self.title("Musicly")
-        self.geometry("400x600")
+        self.geometry("340x500")
         self.columnconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), weight=1)
         self.rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), weight=1)
 
@@ -32,12 +32,16 @@ class Window(
             size=(40, 40),
         )
 
-        self.music_bar = customtkinter.CTkProgressBar(
-            self, orientation="horizontal", width=300
+        self.options = customtkinter.CTkOptionMenu(
+            self, values=["Player", "Playlist"], command=self.options_menu_callback
         )
-        self.music_bar.set(0)
+        self.options.set("Player")
+
+        self.player_frame = customtkinter.CTkFrame(self)
+        self.playlist_frame = customtkinter.CTkFrame(self)
+
         self.volume_level = customtkinter.CTkSlider(
-            self,
+            self.player_frame,
             from_=0,
             to=100,
             command=self.volume_value,
@@ -45,36 +49,63 @@ class Window(
             orientation="vertical",
             height=400,
         )
-        self.options = customtkinter.CTkOptionMenu(self, values=["Player", "Playlist"])
-        self.options.set("Player")
+        self.music_bar = customtkinter.CTkProgressBar(
+            self.player_frame, orientation="horizontal", width=300
+        )
+        self.music_bar.set(0)
+
         self.play_button = customtkinter.CTkButton(
-            self,
+            self.player_frame,
             text=None,
             command=self.play_button_callback,
             image=self.play_image,
             width=50,
             height=50,
         )
-        self.skipfoward_button = customtkinter.CTkButton(
-            self, text=None, image=self.skipfoward_image, width=50, height=50
-        )
-        self.skipbackward_button = customtkinter.CTkButton(
-            self, text=None, image=self.skipbackward_image, width=50, height=50
-        )
-        self.play_button.grid(
-            row=10,
-            column=5,
-        )
-        self.skipfoward_button.grid(row=10, column=5, sticky="e")
-        self.skipbackward_button.grid(row=10, column=5, sticky="w")
-        self.music_bar.grid(row=8, column=5, sticky="s")
-        self.volume_level.grid(row=1, column=0, rowspan=8, sticky="e")
-        self.options.grid(row=0, column=5)
 
-    playing = False
+        self.skipfoward_button = customtkinter.CTkButton(
+            self.player_frame,
+            text=None,
+            image=self.skipfoward_image,
+            width=50,
+            height=50,
+        )
+
+        self.skipbackward_button = customtkinter.CTkButton(
+            self.player_frame,
+            text=None,
+            image=self.skipbackward_image,
+            width=50,
+            height=50,
+        )
+
+        self.options.grid(row=0, column=5, sticky="n")
+        self.volume_level.grid(row=1, column=0, rowspan=8, sticky="e")
+        self.music_bar.grid(row=8, column=5)
+        self.play_button.grid(
+            row=12,
+            column=5,
+            sticky="n",
+        )
+        self.skipfoward_button.grid(row=12, column=5, sticky="e")
+        self.skipbackward_button.grid(row=12, column=5, sticky="w")
 
     def volume_value(self, value):
         print(value)
+
+    def options_menu_callback(self, _):
+        if self.options.get() == "Player":
+            self.player_frame.grid(
+                row=1, column=0, rowspan=10, columnspan=11, sticky="nsew"
+            )
+            self.playlist_frame.grid_forget()
+        else:
+            self.player_frame.grid_forget()
+            self.playlist_frame.grid(
+                row=1, column=0, rowspan=10, columnspan=11, sticky="nsew"
+            )
+
+    playing = False
 
     def play_button_callback(self):
         if not self.playing:
